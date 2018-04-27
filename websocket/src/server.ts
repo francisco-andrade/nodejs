@@ -10,6 +10,12 @@ const server = http.createServer(app);
 //initialize the WebSocket server instance
 const wss = new WebSocket.Server({ server });
 
+app.get('/home', function(req, res){
+    console.log('GET /home');
+    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.end('I am healthy\n');
+});
+
 wss.on('connection', (ws: WebSocket) => {
 
     //connection is up, let's add a simple simple event
@@ -24,19 +30,16 @@ wss.on('connection', (ws: WebSocket) => {
             message = message.replace(broadcastRegex, '');
 
             //send back the message to the other clients
-            wss.clients
-                .forEach(client => {
-                    if (client != ws) {
-                        client.send((new Date()) + ` - Hello, broadcast message -> ${message}`);
-                    }    
+            wss.clients.forEach(client => {
+                    client.send((new Date()) + ` - Broadcast message -> ${message}`);
                 });
-            
+
         } else {
-            ws.send((new Date()) + ` - Hello, you sent -> ${message}`);
+            ws.send((new Date()) + ` - You sent -> ${message}`);
         }
     });
 
-    //send immediatly a feedback to the incoming connection    
+    //send immediatly a feedback to the incoming connection
     ws.send('Hi there, I am a WebSocket server');
 });
 
@@ -44,4 +47,3 @@ wss.on('connection', (ws: WebSocket) => {
 server.listen(process.env.PORT || 8080, () => {
     console.log(`Server started on port ${server.address().port} :)`);
 });
-
